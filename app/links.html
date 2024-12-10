@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Link Sharing</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      background: #f5f5f5;
+      font-family: Arial, sans-serif;
+      height: 100%;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      color: #333;
+    }
+
+    .authed-message {
+      font-size: 20px;
+      color: #333;
+      margin-top: 20px;
+      text-align: center;
+      max-width: 600px;
+      line-height: 1.4;
+      padding: 0 10px;
+    }
+
+    .links-container {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      width: 90%;
+      max-width: 600px;
+      margin-top: 20px;
+    }
+
+    .link-card {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      background: #ffffff;
+      margin: 10px 0;
+      padding: 15px;
+      border-radius: 8px;
+      border: 2px solid #000000;
+      position: relative;
+      transition: box-shadow 0.2s ease;
+    }
+
+    .link-card:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .link-card img {
+      width: 60px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-right: 15px;
+      border: 1px solid #000000;
+    }
+
+    .link-details {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    .link-details a {
+      font-size: 20px;
+      color: #000;
+      text-decoration: none;
+      font-weight: bold;
+      margin-bottom: 5px;
+      word-break: break-all;
+      transition: color 0.2s ease;
+    }
+
+    .link-details a:hover {
+      color: #2575fc;
+    }
+
+    .link-details span {
+      font-size: 14px;
+      color: #555;
+      word-break: break-all;
+    }
+
+    .admin-section {
+      width: 90%;
+      max-width: 600px;
+      margin: 20px 0;
+      background: #ffffff;
+      border-radius: 8px;
+      padding: 20px;
+      border: 2px solid #000000;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    .admin-section h2 {
+      margin-top: 0;
+      margin-bottom: 10px;
+      font-size: 24px;
+      color: #333;
+    }
+
+    .admin-section input[type="text"] {
+      font-size: 16px;
+      padding: 10px;
+      margin: 5px 0;
+      width: calc(100% - 22px);
+      border-radius: 5px;
+      border: 2px solid #000000;
+    }
+
+    .admin-section input[type="text"]:focus {
+      border-color: #2575fc;
+      outline: none;
+    }
+
+    .admin-section button {
+      font-size: 16px;
+      padding: 10px;
+      margin: 10px 0;
+      width: 100%;
+      background-color: #ffffff;
+      border: 2px solid #000;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    .admin-section button:hover {
+      background-color: #b5b5b5;
+    }
+
+    .admin-controls {
+      position: absolute;
+      right: 10px;
+      top: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .admin-controls button {
+      font-size: 14px;
+      background: #ffffff;
+      border: 1px solid #000;
+      border-radius: 3px;
+      cursor: pointer;
+      padding: 2px 8px;
+      transition: background-color 0.2s ease;
+    }
+
+    .admin-controls button:hover {
+      background-color: #b5b5b5;
+    }
+  </style>
+</head>
+<body>
+  <div class="authed-message" id="authedMessage" style="display:none;">
+    Share your links by sharing this URL! Only you can modify this page, but anyone can see it.
+  </div>
+  <div class="links-container" id="linksContainer"></div>
+  <div class="admin-section" id="adminSection" style="display:none;">
+    <h2>Add New Link</h2>
+    <input type="text" id="newUrl" placeholder="URL">
+    <input type="text" id="newText" placeholder="Text">
+    <input type="text" id="newImageUrl" placeholder="Image URL">
+    <button id="addLinkButton">Add Link</button>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      let linksData = [];
+      let authed = false;
+
+      // Fetching from /links/state
+      fetch('/links/state')
+        .then(response => response.json())
+        .then(data => {
+          linksData = data.links;
+          authed = data.authed;
+          renderLinks();
+          if (authed) {
+            document.getElementById("adminSection").style.display = "block";
+            document.getElementById("authedMessage").style.display = "block";
+            document.getElementById("addLinkButton").addEventListener("click", addNewLink);
+          }
+        });
+
+      function renderLinks() {
+        const container = document.getElementById("linksContainer");
+        container.innerHTML = '';
+
+        linksData.forEach((link, index) => {
+          const card = document.createElement('div');
+          card.className = 'link-card';
+
+          const img = document.createElement('img');
+          img.src = link["image-url"] || '';
+          card.appendChild(img);
+
+          const details = document.createElement('div');
+          details.className = 'link-details';
+
+          const anchor = document.createElement('a');
+          anchor.href = link.url;
+          anchor.target = '_blank';
+          anchor.textContent = link.text || link.url;
+          details.appendChild(anchor);
+
+          const span = document.createElement('span');
+          span.textContent = link.url;
+          details.appendChild(span);
+          card.appendChild(details);
+
+          if (authed) {
+            const adminControls = document.createElement('div');
+            adminControls.className = 'admin-controls';
+
+            const deleteButton = document.createElement('button');
+            deleteButton.textContent = 'X';
+            deleteButton.addEventListener('click', function() {
+              deleteLink(index);
+            });
+            adminControls.appendChild(deleteButton);
+
+            // Up arrow: move link from currentIndex to currentIndex - 1
+            const upButton = document.createElement('button');
+            upButton.innerHTML = '&uarr;'; // Using HTML entity for arrow
+            upButton.addEventListener('click', function() {
+              const currentIndex = index;
+              const newIndex = currentIndex - 1;
+              reorderLink(currentIndex, newIndex);
+            });
+            adminControls.appendChild(upButton);
+
+            // Down arrow: move link from currentIndex to currentIndex + 1
+            const downButton = document.createElement('button');
+            downButton.innerHTML = '&darr;'; // Using HTML entity for arrow
+            downButton.addEventListener('click', function() {
+              const currentIndex = index;
+              const newIndex = currentIndex + 1;
+              reorderLink(currentIndex, newIndex);
+            });
+            adminControls.appendChild(downButton);
+
+            card.appendChild(adminControls);
+          }
+
+          container.appendChild(card);
+        });
+      }
+
+      function addNewLink() {
+        const url = document.getElementById('newUrl').value;
+        const text = document.getElementById('newText').value;
+        const imageUrl = document.getElementById('newImageUrl').value;
+
+        const newLink = {
+          "url": url,
+          "text": text,
+          "image-url": imageUrl
+        };
+
+        fetch('/links', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ new: newLink })
+        }).then(response => {
+          if (response.ok) {
+            location.reload();
+          } else {
+            alert("Failed to add link.");
+          }
+        });
+      }
+
+      function deleteLink(index) {
+        fetch('/links', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ delete: {"index": index} })
+        }).then(response => {
+          if (response.ok) {
+            location.reload();
+          } else {
+            alert("Failed to delete link.");
+          }
+        });
+      }
+
+      function reorderLink(currentIndex, newIndex) {
+        // If newIndex is out of bounds, do nothing
+        if (newIndex < 0 || newIndex >= linksData.length) return;
+
+        fetch('/links', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ reorder: { current: currentIndex, new: newIndex } })
+        }).then(response => {
+          if (response.ok) {
+            location.reload();
+          } else {
+            alert("Failed to reorder links.");
+          }
+        });
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+:~  title+'Links'
+    info+'Publically share links from your ship.'
+    color+0x6f.ff52
+    base+'links'
+    site+/links
+    version+[0 1 0]
+    website+'https://x.com/hanfel_dovned'
+    license+''
+==
+
