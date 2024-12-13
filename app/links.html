@@ -53,13 +53,25 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     }
 
-    .link-card img {
+    .link-image-container {
       width: 60px;
       height: 60px;
-      object-fit: cover;
       border-radius: 8px;
-      margin-right: 15px;
       border: 1px solid #000000;
+      margin-right: 15px;
+      flex-shrink: 0;
+      background-color: #eee;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .link-image-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
     }
 
     .link-details {
@@ -178,7 +190,6 @@
       let linksData = [];
       let authed = false;
 
-      // Fetching from /links/state
       fetch('/links/state')
         .then(response => response.json())
         .then(data => {
@@ -200,9 +211,15 @@
           const card = document.createElement('div');
           card.className = 'link-card';
 
-          const img = document.createElement('img');
-          img.src = link["image-url"] || '';
-          card.appendChild(img);
+          const imageContainer = document.createElement('div');
+          imageContainer.className = 'link-image-container';
+
+          if (link["image-url"] && link["image-url"].trim() !== '') {
+            const img = document.createElement('img');
+            img.src = link["image-url"];
+            imageContainer.appendChild(img);
+          }
+          card.appendChild(imageContainer);
 
           const details = document.createElement('div');
           details.className = 'link-details';
@@ -216,6 +233,7 @@
           const span = document.createElement('span');
           span.textContent = link.url;
           details.appendChild(span);
+
           card.appendChild(details);
 
           if (authed) {
@@ -229,23 +247,17 @@
             });
             adminControls.appendChild(deleteButton);
 
-            // Up arrow: move link from currentIndex to currentIndex - 1
             const upButton = document.createElement('button');
-            upButton.innerHTML = '&uarr;'; // Using HTML entity for arrow
+            upButton.innerHTML = '&uarr;';
             upButton.addEventListener('click', function() {
-              const currentIndex = index;
-              const newIndex = currentIndex - 1;
-              reorderLink(currentIndex, newIndex);
+              reorderLink(index, index - 1);
             });
             adminControls.appendChild(upButton);
 
-            // Down arrow: move link from currentIndex to currentIndex + 1
             const downButton = document.createElement('button');
-            downButton.innerHTML = '&darr;'; // Using HTML entity for arrow
+            downButton.innerHTML = '&darr;';
             downButton.addEventListener('click', function() {
-              const currentIndex = index;
-              const newIndex = currentIndex + 1;
-              reorderLink(currentIndex, newIndex);
+              reorderLink(index, index + 1);
             });
             adminControls.appendChild(downButton);
 
@@ -295,7 +307,6 @@
       }
 
       function reorderLink(currentIndex, newIndex) {
-        // If newIndex is out of bounds, do nothing
         if (newIndex < 0 || newIndex >= linksData.length) return;
 
         fetch('/links', {
