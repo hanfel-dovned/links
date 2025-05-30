@@ -93,6 +93,25 @@
   ?+    -.cage  !!
       %handle-http-request
     (handle-http !<([@ta =inbound-request:eyre] +.cage))
+      %links-action
+    (handle-action !<(action +.cage))
+  ==
+::
+++  handle-action
+  |=  act=action
+  ^+  that
+  ?-    -.act
+      %new
+    that(links [link.act links])
+  ::
+      %delete
+    that(links (oust [index.act 1] links))
+  ::
+      %reorder
+    =/  link  (snag current.act links)
+    =.  links  (oust [current.act 1] links)
+    =.  links  (into links new.act link)
+    that
   ==
 ::
 ++  handle-http
@@ -109,24 +128,9 @@
     ?~  body.request.inbound-request  !!
     =/  json  (de:json:html q.u.body.request.inbound-request)
     =/  act  (dejs-action +.json)
-    ?-    -.act
-        %new
-      =.  links  [link.act links]
-      %-  emil  %-  flop  %-  send
-      [200 ~ [%json enjs-links]]
-    ::
-        %delete
-      =.  links  (oust [index.act 1] links)
-      %-  emil  %-  flop  %-  send
-      [200 ~ [%json enjs-links]]
-    ::
-        %reorder
-      =/  link  (snag current.act links)
-      =.  links  (oust [current.act 1] links)
-      =.  links  (into links new.act link)
-      %-  emil  %-  flop  %-  send
-      [200 ~ [%json enjs-links]]
-    ==
+    =.  that  (handle-action act)
+    %-  emil  %-  flop  %-  send
+    [200 ~ [%json enjs-links]]
     ::
       %'GET'
     %-  emil  %-  flop  %-  send
