@@ -42,7 +42,25 @@
 ++  on-peek
   |=  =path
   ^-  (unit (unit cage))
-  [~ ~]
+  ?+    path  [~ ~]
+      [%y %links %html ~]
+    :-  ~
+    :-  ~
+    :-  %noun
+    !>
+    %-  crip
+    %-  en-xml:html
+    ;html
+      ;body
+        ;div
+          ;*  %+  turn 
+                links 
+              |=  [url=@t text=@t image-url=@t] 
+              ;p: {(trip text)}
+        ==
+      ==
+    ==
+  ==
 ::
 ++  on-agent
   |=  [=wire =sign:agent:gall]
