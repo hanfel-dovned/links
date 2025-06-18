@@ -91,10 +91,16 @@
 ::
 ++  init
   ^+  that
-  %-  emit
-  :*  %pass   /eyre/connect   
-      %arvo  %e  %connect
-      `/links  %links
+  %-  emil
+  :~  :*  %pass   /eyre/connect   
+          %arvo  %e  %connect
+          `/links  %links
+      ==
+  ::
+      :*  %pass  /ai-docs  %agent
+          [our.bowl %scrai]  %poke
+          %scrai-action  !>([%set-docs ai-docs])
+      ==
   ==
 ::
 ++  watch
@@ -189,4 +195,36 @@
       [%delete (ot ~[index+ni])]
       [%reorder (ot ~[current+ni new+ni])]
   ==
+::
+++  ai-docs
+  '''
+   %links
+
+  An Urbit app that lets you host a page of links from your ship.
+
+  Has the following type definitions:
+  
+  |%
+  +$  link  [url=@t text=@t image-url=@t]
+  +$  action  
+    $%  [%new =link]
+        [%delete index=@ud]
+        [%reorder current=@ud new=@ud]
+    ==
+  --
+
+  So, examples of the cards that you can send will be:
+  
+  [%pass /ai %agent [our.bowl %links] %poke %links-action !>([%new 'http://google.com' 'Google' 'http://google.com/google-logo'])]
+  Adds a link to the user's links.
+
+  We won't implement the delete and reorder actions right now.
+  
+  Scry paths:
+
+  /=links=/links/html
+  Get a list of the user's links
+  
+  --------
+  '''
 --
