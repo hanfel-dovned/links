@@ -43,7 +43,7 @@
   |=  =path
   ^-  (unit (unit cage))
   ?+    path  [~ ~]
-      [%y %links %html ~]
+      [%y %links ~]
     :-  ~
     :-  ~
     :-  %noun
@@ -51,12 +51,30 @@
     %-  crip
     %-  en-xml:html
     ;html
+      ;head
+        ;style: {style}
+      ==
       ;body
-        ;div
-          ;*  %+  turn 
-                links 
-              |=  [url=@t text=@t image-url=@t] 
-              ;p: {(trip text)}
+        ;div.link-container
+          ;*
+          %+  turn 
+            links
+          |=  [url=@t text=@t image-url=@t] 
+          ;div.link-card
+            ;div.link-image-container
+              ;+  =/  source  (trip image-url)
+                  ;img(src source);
+            ==
+            ;div.link-details
+              ;+  =/  link  (trip url)
+                  ;a
+                    =href  "test"
+                    =target  "_blank"
+                    ; {(trip text)}
+                  ==
+              ;span:  {(trip url)}
+            ==
+          ==
         ==
       ==
     ==
@@ -222,9 +240,89 @@
   
   Scry paths:
 
-  /=links=/links/html
+  /~/links/~/links
+  
   Get a list of the user's links
   
   --------
+  '''
+::
+++  style
+  ^~
+  %-  trip
+  '''
+
+    .links-container {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      width: 90%;
+      max-width: 600px;
+      margin-top: 20px;
+    }
+
+    .link-card {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      background: #ffffff;
+      margin: 10px 0;
+      padding: 15px;
+      border-radius: 8px;
+      border: 2px solid #000000;
+      position: relative;
+      transition: box-shadow 0.2s ease;
+    }
+
+    .link-card:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .link-image-container {
+      width: 60px;
+      height: 60px;
+      border-radius: 8px;
+      border: 1px solid #000000;
+      margin-right: 15px;
+      flex-shrink: 0;
+      background-color: #eee;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .link-image-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .link-details {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    .link-details a {
+      font-size: 20px;
+      color: #000;
+      text-decoration: none;
+      font-weight: bold;
+      margin-bottom: 5px;
+      word-break: break-all;
+      transition: color 0.2s ease;
+    }
+
+    .link-details a:hover {
+      color: #2575fc;
+    }
+
+    .link-details span {
+      font-size: 14px;
+      color: #555;
+      word-break: break-all;
+    }
   '''
 --
